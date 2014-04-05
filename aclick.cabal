@@ -17,7 +17,7 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 executable aclick
-  main-is: AClick/Commands.hs
+  main-is: AClick/Main.hs
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.6 && <4.7,

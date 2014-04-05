@@ -1,7 +1,4 @@
-module Command
-( Command(..)
-, Value(..)
-) where
+module AClick.Command where
 
 import Control.Concurrent
 import Control.Monad
@@ -68,10 +65,3 @@ listen sock m = do
   (handle, _, _) <- accept sock
   _ <- forkFinally (handler handle m) (\_ -> hClose handle)
   return ()
-
-main :: IO ()
-main = do
-  sock <- listenOn (PortNumber (fromIntegral port))
-  printf "AClick initialized on port %d\n" port
-  m <- newMVar Map.empty
-  forever (listen sock m)
