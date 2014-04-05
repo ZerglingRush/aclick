@@ -8,6 +8,7 @@ import System.IO
 import Text.Printf
 import qualified Data.Map as Map
 import Data.Char (isDigit, toLower)
+import Data.Maybe (fromMaybe)
 
 port :: Int
 port = 6666
@@ -42,9 +43,14 @@ fromString s
 
 keyValue (k:v:_) m = (Map.insert k (parseValue v) m, StringValue "success")
 getKey (k:_) m     = (m, m Map.! k)
-incrValue (k:_) m  = (Map.insert k newVal m, newVal)
+
+incrValue (k:_) m  = (newMap, fromMaybe (Error 1 "Cannot add to non-integer") newVal)
   where
-    addOne (IntValue v) = IntValue (v + 1)
+    addOne (IntValue v) = Just (IntValue (v + 1))
+    addOne _            = Nothing
+    newMap newVal = case newVal of
+      Just (IntValue val) -> Map.insert k (IntValue val) m
+      Nothing             -> m
     newVal = addOne (m Map.! k)
 
 processCommands
