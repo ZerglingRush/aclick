@@ -1,4 +1,7 @@
-module Main where
+module Command
+( Command(..)
+, Value(..)
+) where
 
 import Control.Concurrent
 import Control.Monad
