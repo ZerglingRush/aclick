@@ -54,7 +54,7 @@ processWords (w: ws) m = case fromString w of
   Just Incr -> incrValue ws m
   Nothing   -> (m, properUsage)
 
-handler h m = catch (handler' h m) (\(e :: SomeException) -> hPutStr h "Error!")
+handler h m = catch (handler' h m) (\e -> hPutStr h (show (e :: SomeException)))
 
 handler' :: Handle -> MVar (Map.Map String Value) -> IO ()
 handler' h m = do
