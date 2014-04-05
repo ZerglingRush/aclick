@@ -10,9 +10,14 @@ import Data.Char (isDigit, toLower)
 
 import Command
 
+port :: Int
+port = 6666
+
 main :: IO ()
 main = do
   sock <- listenOn (PortNumber (fromIntegral port))
   printf "AClick initialized on port %d\n" port
   m <- newMVar Map.empty
   forever (listen sock m)
+
+
