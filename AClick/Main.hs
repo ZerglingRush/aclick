@@ -9,10 +9,24 @@ import Text.Printf
 port :: Int
 port = 6666
 
+properUsage :: String
+properUsage = "Call 'set key value' or 'get key'"
+
+keyValue (k:v:_) = properUsage
+getKey k         = properUsage
+
+processWords :: [String] -> String
+processWords [] = properUsage
+processWords (w: ws)
+    | w == "set" = keyValue ws
+    | w == "get" = getKey ws
+    | otherwise  = properUsage
+
 handler :: Handle -> IO ()
 handler h = do
   hPutStr h "Go to Hell!!!!!!\n"
   input <- (hGetLine h)
+  print $ processWords (words input)
   print input
   hPutStr h (input ++ "\n")
 
