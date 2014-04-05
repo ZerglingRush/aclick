@@ -47,26 +47,28 @@ incrValue (k:_) m  = (Map.insert k newVal m, newVal)
     addOne (IntValue v) = IntValue (v + 1)
     newVal = addOne (m Map.! k)
 
-processWords
+processCommands
   :: [String]
   -> Map.Map String Value
   -> (Map.Map String Value, Value)
-processWords [] m = (m, properUsage)
-processWords (w: ws) m = case fromString w of
+processCommands [] m = (m, properUsage)
+processCommands (w: ws) m = case fromString w of
   Just Set  -> keyValue ws m
   Just Get  -> getKey   ws m
   Just Incr -> incrValue ws m
   Nothing   -> (m, properUsage)
+
+handleInput :: String -> Map.Map String Value -> IO (Map.Map String Value, Value)
+handleInput input r = return $ processCommands (words input) r
+
 
 handler :: Handle -> MVar (Map.Map String Value) -> IO ()
 handler h m = do
   hPutStr h ("Go to Hell!!!!!!\n")
   input <- (hGetLine h)
   print input
-  r <- takeMVar m
-  let (newM, t) = processWords (words input) r
-  putMVar m newM
-  hPutStr h ((valueToString t) ++ "\n")
+  result <- modifyMVar m (handleInput input)
+  hPutStr h ((valueToString result) ++ "\n")
 
 listen :: Socket -> MVar (Map.Map String Value) -> IO ()
 listen sock m = do
