@@ -5,6 +5,7 @@ import Control.Monad
 import Network
 import System.IO
 import Text.Printf
+import qualified Data.Map as Map
 
 port :: Int
 port = 6666
@@ -12,32 +13,43 @@ port = 6666
 properUsage :: String
 properUsage = "Call 'set key value' or 'get key'"
 
-keyValue (k:v:_) = properUsage
-getKey k         = properUsage
+-- Look at MVars as a way of storing things
+-- and accessing them from different threads
+-- Marlow has good examples
+keyValue (k:v:_) m = (Map.insert k v m, "")
+getKey (k:_) m     = (m, m Map.! k)
 
-processWords :: [String] -> String
-processWords [] = properUsage
-processWords (w: ws)
-    | w == "set" = keyValue ws
-    | w == "get" = getKey ws
-    | otherwise  = properUsage
+processWords
+    :: [String]
+    -> Map.Map String String
+    -> (Map.Map String String, String)
+processWords [] m = (m, properUsage)
+processWords (w: ws) m
+    | w == "set" = keyValue ws m
+    | w == "get" = getKey ws m
+    | otherwise  = (m, properUsage)
 
-handler :: Handle -> IO ()
-handler h = do
-  hPutStr h "Go to Hell!!!!!!\n"
+handler :: Handle -> MVar (Map.Map String String) -> IO ()
+handler h m = do
+  r <- takeMVar m
+  hPutStr h ("Go to Hell!!!!!!\n")
   input <- (hGetLine h)
-  print $ processWords (words input)
+  let (newM, t) = processWords (words input) r
   print input
+  print t
+  putMVar m newM
   hPutStr h (input ++ "\n")
 
-listen :: Socket -> IO ()
-listen sock = do
+listen :: Socket -> MVar (Map.Map String String) -> IO ()
+listen sock m = do
   (handle, _, _) <- accept sock
-  _ <- forkFinally (handler handle) (\_ -> hClose handle)
+  _ <- forkFinally (handler handle m) (\_ -> hClose handle)
   return ()
 
 main :: IO ()
 main = do
   sock <- listenOn (PortNumber (fromIntegral port))
   printf "AClick initialized on port %d\n" port
-  forever (listen sock)
+  m <- newMVar Map.empty
+  forever (listen sock m)
+
