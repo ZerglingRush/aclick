@@ -30,12 +30,16 @@ valueToString (StringValue v) = show v
 
 fromString :: String -> Maybe Command
 fromString s
-  | map toLower s == "set" = Just Set
-  | map toLower s == "get" = Just Get
-  | otherwise              = Nothing
+  | map toLower s == "set"  = Just Set
+  | map toLower s == "get"  = Just Get
+  | map toLower s == "incr" = Just Incr
+  | otherwise               = Nothing
 
 keyValue (k:v:_) m = (Map.insert k (parseValue v) m, StringValue "success")
 getKey (k:_) m     = (m, m Map.! k)
+incrValue (k:_) m  = (Map.update addOne k m, StringValue "Possibly incremented")
+  where
+    addOne (IntValue v) = Just (IntValue (v + 1))
 
 processWords
   :: [String]
@@ -43,9 +47,10 @@ processWords
   -> (Map.Map String Value, Value)
 processWords [] m = (m, properUsage)
 processWords (w: ws) m = case fromString w of
-  Just Set -> keyValue ws m
-  Just Get -> getKey   ws m
-  Nothing  -> (m, properUsage)
+  Just Set  -> keyValue  ws m
+  Just Get  -> getKey    ws m
+  Just Incr -> incrValue ws m
+  Nothing   -> (m, properUsage)
 
 handler :: Handle -> MVar (Map.Map String Value) -> IO ()
 handler h m = do
