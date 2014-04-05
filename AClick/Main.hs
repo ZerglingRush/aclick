@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Concurrent
 import Control.Monad
 import Network
 import System.IO
@@ -18,8 +19,8 @@ handler h = do
 listen :: Socket -> IO ()
 listen sock = do
   (handle, _, _) <- accept sock
-  handler handle
-  hClose handle
+  _ <- forkFinally (handler handle) (\_ -> hClose handle)
+  return ()
 
 main :: IO ()
 main = do
