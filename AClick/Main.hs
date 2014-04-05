@@ -6,6 +6,7 @@ import Network
 import System.IO
 import Text.Printf
 import qualified Data.Map as Map
+import Data.Char (toLower)
 
 port :: Int
 port = 6666
@@ -25,8 +26,8 @@ processWords
     -> (Map.Map String String, String)
 processWords [] m = (m, properUsage)
 processWords (w: ws) m
-    | w == "set" = keyValue ws m
-    | w == "get" = getKey ws m
+    | map toLower w == "set" = keyValue ws m
+    | map toLower w == "get" = getKey ws m
     | otherwise  = (m, properUsage)
 
 handler :: Handle -> MVar (Map.Map String String) -> IO ()
