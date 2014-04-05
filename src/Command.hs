@@ -1,6 +1,7 @@
 module Command where
 
 import Control.Concurrent
+import Control.Concurrent.STM
 import Control.Exception.Base
 import Control.Monad
 import Network
@@ -72,19 +73,23 @@ processCommands (x:y:z:[]) m = case (fromString x) of
   Just Set -> setKey y z m
   Nothing  -> invalidCommand m
 
-handleInput :: String -> Map.Map String (Value a)
-               -> IO (Map.Map String (Value a), Value a)
-handleInput input r = return $ processCommands (words input) r
+handleInput :: String -> TVar (Map.Map String (Value a))
+               -> STM (Value a)
+handleInput input m = do
+  table <- readTVar m
+  let (newTable, result) = processCommands (words input) table
+  writeTVar m newTable
+  return result
 
-handler :: Handle -> MVar (Map.Map String (Value a)) -> IO ()
+handler :: Handle -> TVar (Map.Map String (Value a)) -> IO ()
 handler h m = do
   hPutStr h ("Go to Hell!!!!!!\n")
   input <- (hGetLine h)
   print input
-  result <- modifyMVar m (handleInput input)
+  result <- atomically $ (handleInput input m)
   hPutStr h ((show result) ++ "\n")
 
-listen :: Socket -> MVar (Map.Map String (Value a)) -> IO ()
+listen :: Socket -> TVar (Map.Map String (Value a)) -> IO ()
 listen sock m = do
   (handle, _, _) <- accept sock
   _ <- forkFinally (handler handle m) (\_ -> hClose handle)
