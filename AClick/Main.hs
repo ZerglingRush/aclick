@@ -32,8 +32,8 @@ processWords (w: ws) m
 handler :: Handle -> MVar (Map.Map String String) -> IO ()
 handler h m = do
   hPutStr h ("Go to Hell!!!!!!\n")
-  r <- takeMVar m
   input <- (hGetLine h)
+  r <- takeMVar m
   let (newM, t) = processWords (words input) r
   putMVar m newM
   hPutStr h (t ++ "\n")
