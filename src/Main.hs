@@ -1,4 +1,4 @@
-module AClick.Main where
+module Main where
 
 import Control.Concurrent
 import Control.Monad
@@ -8,7 +8,7 @@ import Text.Printf
 import qualified Data.Map as Map
 import Data.Char (isDigit, toLower)
 
-import AClick.Command
+import Command
 
 main :: IO ()
 main = do

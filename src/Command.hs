@@ -1,4 +1,4 @@
-module AClick.Command where
+module Command where
 
 import Control.Concurrent
 import Control.Monad
