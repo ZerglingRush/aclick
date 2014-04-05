@@ -37,9 +37,10 @@ fromString s
 
 keyValue (k:v:_) m = (Map.insert k (parseValue v) m, StringValue "success")
 getKey (k:_) m     = (m, m Map.! k)
-incrValue (k:_) m  = (Map.update addOne k m, StringValue "Possibly incremented")
+incrValue (k:_) m  = (Map.insert k newVal m, newVal)
   where
     addOne (IntValue v) = Just (IntValue (v + 1))
+    newVal = addOne (m Map.! k)
 
 processWords
   :: [String]
