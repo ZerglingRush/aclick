@@ -2,10 +2,10 @@ import Control.Concurrent
 import Network
 import System.IO
 
-setNum :: Integer -> IO ()
-setNum i = do
+main =sequence $ map (\i -> do
+  print "herp"
   h <- connectTo "localhost" (PortNumber (fromIntegral 6666))
+  derp <- hGetLine h
+  print derp
   hPutStr h ("set " ++ (show i) ++ " " ++ (show i) ++ "\n")
-  hClose h
-
-main = setNum 1
+  hClose h) [1..100]
