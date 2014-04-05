@@ -12,14 +12,18 @@ import Data.Char (isDigit, toLower)
 properUsage :: Value
 properUsage = Error 1 "Use it like this 'set key value' asshole"
 
+invalidKey :: Value
+invalidKey = Error 2 "No key found"
+
 data Command = Set | Get | Incr
 
 data Value = IntValue Int | StringValue String | Error Int String
 
 instance Show Value where
-  show (IntValue i) = "(integer)" ++ show i
+  show (IntValue i) = "(integer) " ++ show i
   show (StringValue s) = show s
   show (Error i e) = show "(error #)" ++ show i ++ ":" ++ show e
+
 
 parseValue :: String -> Value
 parseValue s
@@ -41,15 +45,15 @@ keyValue (k:v:_) m = (Map.insert k (parseValue v) m, StringValue "success")
 getKey :: [String] ->
           (Map.Map String Value) ->
           (Map.Map String Value, Value)
-getKey (k:_) m     = (m, m Map.! k)
+getKey (k:_) m = (m, Map.findWithDefault invalidKey k m)
 
 incrValue :: [String] ->
             (Map.Map String Value) ->
             (Map.Map String Value, Value)
-incrValue (k:_) m  = (Map.insert k newVal m, newVal)
+incrValue (k:_) m = (Map.insert k newVal m, newVal)
   where
     addOne (IntValue v) = IntValue (v + 1)
-    newVal = addOne (m Map.! k)
+    newVal = addOne $ Map.findWithDefault invalidKey k m
 
 processCommands
   :: [String]
