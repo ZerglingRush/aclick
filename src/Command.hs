@@ -84,7 +84,7 @@ handler h m = do
   input <- (hGetLine h)
   print input
   result <- atomically $ (handleInput input m)
-  hPutStr h ((valueToString result) ++ "\n")
+  hPutStr h ((show result) ++ "\n")
 
 listen :: Socket -> TVar (Map.Map String Value) -> IO ()
 listen sock m = do
