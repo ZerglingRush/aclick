@@ -12,7 +12,15 @@ port :: Int
 port = 6666
 
 properUsage :: String
-properUsage = "Call 'set key value' or 'get key'"
+properUsage = "Use it like this 'set key value' asshole"
+
+data Command = Set | Get
+
+fromString :: String -> Maybe Command
+fromString s
+    | map toLower s == "set" = Just Set
+    | map toLower s == "get" = Just Get
+    | otherwise              = Nothing
 
 -- Look at MVars as a way of storing things
 -- and accessing them from different threads
@@ -25,10 +33,10 @@ processWords
     -> Map.Map String String
     -> (Map.Map String String, String)
 processWords [] m = (m, properUsage)
-processWords (w: ws) m
-    | map toLower w == "set" = keyValue ws m
-    | map toLower w == "get" = getKey ws m
-    | otherwise  = (m, properUsage)
+processWords (w: ws) m = case fromString w of
+    Just Set -> keyValue ws m
+    Just Get -> getKey   ws m
+    Nothing  -> (m, properUsage)
 
 handler :: Handle -> MVar (Map.Map String String) -> IO ()
 handler h m = do
