@@ -16,7 +16,7 @@ properUsage = "Call 'set key value' or 'get key'"
 -- Look at MVars as a way of storing things
 -- and accessing them from different threads
 -- Marlow has good examples
-keyValue (k:v:_) m = (Map.insert k v m, "")
+keyValue (k:v:_) m = (Map.insert k v m, "success")
 getKey (k:_) m     = (m, m Map.! k)
 
 processWords
@@ -31,14 +31,12 @@ processWords (w: ws) m
 
 handler :: Handle -> MVar (Map.Map String String) -> IO ()
 handler h m = do
-  r <- takeMVar m
   hPutStr h ("Go to Hell!!!!!!\n")
+  r <- takeMVar m
   input <- (hGetLine h)
   let (newM, t) = processWords (words input) r
-  print input
-  print t
   putMVar m newM
-  hPutStr h (input ++ "\n")
+  hPutStr h (t ++ "\n")
 
 listen :: Socket -> MVar (Map.Map String String) -> IO ()
 listen sock m = do
@@ -52,4 +50,3 @@ main = do
   printf "AClick initialized on port %d\n" port
   m <- newMVar Map.empty
   forever (listen sock m)
-
