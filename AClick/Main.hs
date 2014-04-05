@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Concurrent
+import Control.Exception.Base
 import Control.Monad
 import Network
 import System.IO
@@ -53,10 +54,13 @@ processWords (w: ws) m = case fromString w of
   Just Incr -> incrValue ws m
   Nothing   -> (m, properUsage)
 
-handler :: Handle -> MVar (Map.Map String Value) -> IO ()
-handler h m = do
+handler h m = catch (handler' h m) (\(e :: SomeException) -> hPutStr h "Error!")
+
+handler' :: Handle -> MVar (Map.Map String Value) -> IO ()
+handler' h m = do
   hPutStr h ("Go to Hell!!!!!!\n")
   input <- (hGetLine h)
+  print input
   r <- takeMVar m
   let (newM, t) = processWords (words input) r
   putMVar m newM

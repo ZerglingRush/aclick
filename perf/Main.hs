@@ -3,10 +3,9 @@ import Network
 import System.IO
 
 setNum :: Integer -> IO ()
-setNum i = (forkIO $ do
+setNum i = do
   h <- connectTo "localhost" (PortNumber (fromIntegral 6666))
   hPutStr h ("set " ++ (show i) ++ " " ++ (show i) ++ "\n")
-  hClose h) >>= (\_ -> return ())
+  hClose h
 
-main :: IO [()]
-main =  mapM setNum [1]
+main = setNum 1
