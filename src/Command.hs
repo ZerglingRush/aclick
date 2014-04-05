@@ -58,7 +58,8 @@ processCommands (w: ws) m = case fromString w of
   Just Incr -> incrValue ws m
   Nothing   -> (m, properUsage)
 
-handleInput :: String -> Map.Map String Value -> IO (Map.Map String Value, Value)
+handleInput :: String -> Map.Map String Value
+               -> IO (Map.Map String Value, Value)
 handleInput input r = return $ processCommands (words input) r
 
 
