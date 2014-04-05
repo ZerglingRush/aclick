@@ -9,9 +9,6 @@ import Text.Printf
 import qualified Data.Map as Map
 import Data.Char (isDigit, toLower)
 
-properUsage :: Value
-properUsage = Error 1 "Use it like this 'set key value' asshole"
-
 invalidKey :: Value
 invalidKey = Error 2 "No key found"
 
@@ -23,7 +20,6 @@ instance Show Value where
   show (IntValue i) = "(integer) " ++ show i
   show (StringValue s) = show s
   show (Error i e) = show "(error #)" ++ show i ++ ":" ++ show e
-
 
 parseValue :: String -> Value
 parseValue s
@@ -37,34 +33,38 @@ fromString s
   | map toLower s == "incr" = Just Incr
   | otherwise               = Nothing
 
-keyValue :: [String] ->
-            (Map.Map String Value) ->
-            (Map.Map String Value, Value)
-keyValue (k:v:_) m = (Map.insert k (parseValue v) m, StringValue "success")
-
-getKey :: [String] ->
+getKey :: String ->
           (Map.Map String Value) ->
           (Map.Map String Value, Value)
-getKey (k:_) m = (m, Map.findWithDefault invalidKey k m)
+getKey k m = (m, Map.findWithDefault invalidKey k m)
 
-incrValue :: [String] ->
-            (Map.Map String Value) ->
-            (Map.Map String Value, Value)
-incrValue (k:_) m = (Map.insert k newVal m, newVal)
+setKey :: String ->
+          String ->
+          (Map.Map String Value) ->
+          (Map.Map String Value, Value)
+setKey k v m = (Map.insert k (parseValue v) m, StringValue "success")
+
+incrKey :: String ->
+             (Map.Map String Value) ->
+             (Map.Map String Value, Value)
+incrKey k m = (Map.insert k newVal m, newVal)
   where
     addOne (IntValue v) = IntValue (v + 1)
     newVal = addOne $ Map.findWithDefault invalidKey k m
+
+invalidCommand :: Map.Map String Value -> (Map.Map String Value, Value)
+invalidCommand m = (m, Error 1 "Use it like this 'set key value' asshole")
 
 processCommands
   :: [String]
   -> Map.Map String Value
   -> (Map.Map String Value, Value)
-processCommands [] m = (m, properUsage)
-processCommands (w: ws) m = case fromString w of
-  Just Set  -> keyValue ws m
-  Just Get  -> getKey   ws m
-  Just Incr -> incrValue ws m
-  Nothing   -> (m, properUsage)
+processCommands [] m = invalidCommand m
+processCommands (w: x : y : ws) m = case fromString w of
+  Just Set  -> setKey  x y m
+  Just Get  -> getKey  x m
+  Just Incr -> incrKey x m
+  Nothing   -> invalidCommand m
 
 handleInput :: String -> Map.Map String Value
                -> IO (Map.Map String Value, Value)
