@@ -1,6 +1,7 @@
 module Command where
 
 import Control.Concurrent
+import Control.Exception.Base
 import Control.Monad
 import Network
 import System.IO
@@ -40,6 +41,10 @@ fromString s
 
 keyValue (k:v:_) m = (Map.insert k (parseValue v) m, StringValue "success")
 getKey (k:_) m     = (m, m Map.! k)
+incrValue (k:_) m  = (Map.insert k newVal m, newVal)
+  where
+    addOne (IntValue v) = IntValue (v + 1)
+    newVal = addOne (m Map.! k)
 
 processWords
   :: [String]
@@ -55,6 +60,7 @@ handler :: Handle -> MVar (Map.Map String Value) -> IO ()
 handler h m = do
   hPutStr h ("Go to Hell!!!!!!\n")
   input <- (hGetLine h)
+  print input
   r <- takeMVar m
   let (newM, t) = processWords (words input) r
   putMVar m newM
