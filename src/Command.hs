@@ -45,8 +45,8 @@ setKey :: String ->
 setKey k v m = (Map.insert k (parseValue v) m, StringValue "success")
 
 incrKey :: String ->
-             (Map.Map String Value) ->
-             (Map.Map String Value, Value)
+           (Map.Map String Value) ->
+           (Map.Map String Value, Value)
 incrKey k m = (Map.insert k newVal m, newVal)
   where
     addOne (IntValue v) = IntValue (v + 1)
@@ -60,11 +60,14 @@ processCommands
   -> Map.Map String Value
   -> (Map.Map String Value, Value)
 processCommands [] m = invalidCommand m
-processCommands (w: x : y : ws) m = case fromString w of
-  Just Set  -> setKey  x y m
-  Just Get  -> getKey  x m
-  Just Incr -> incrKey x m
+processCommands [x] m = invalidCommand m
+processCommands (x:y:[]) m = case (fromString x) of
+  Just Get  -> getKey y m
+  Just Incr -> incrKey y m
   Nothing   -> invalidCommand m
+processCommands (x:y:z:[]) m = case (fromString x) of
+  Just Set -> setKey y z m
+  Nothing  -> invalidCommand m
 
 handleInput :: String -> Map.Map String Value
                -> IO (Map.Map String Value, Value)
