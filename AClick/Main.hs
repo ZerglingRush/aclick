@@ -10,7 +10,10 @@ port = 6666
 
 handler :: Handle -> IO ()
 handler h = do
-  hPutStr h "Go to Hell!!!!!!"
+  hPutStr h "Go to Hell!!!!!!\n"
+  input <- (hGetLine h)
+  print input
+  hPutStr h (input ++ "\n")
 
 listen :: Socket -> IO ()
 listen sock = do
