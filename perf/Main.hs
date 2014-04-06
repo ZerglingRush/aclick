@@ -1,11 +1,16 @@
 import Control.Concurrent
+import Control.Monad
 import Network
 import System.IO
 
-main =sequence $ map (\i -> do
-  print "herp"
+setNum :: Integer -> IO ()
+setNum i = do
   h <- connectTo "localhost" (PortNumber (fromIntegral 6666))
-  derp <- hGetLine h
-  print derp
+  _ <- hGetLine h
   hPutStr h ("set " ++ (show i) ++ " " ++ (show i) ++ "\n")
-  hClose h) [1..100]
+  hClose h
+
+setNumThread :: Integer -> IO ()
+setNumThread i = void $ (forkIO $ setNum i)
+
+main =sequence $ map setNumThread [1..10000]

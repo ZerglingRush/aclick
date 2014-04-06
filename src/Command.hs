@@ -85,7 +85,6 @@ handler :: Handle -> TVar (Map.Map String (Value a)) -> IO ()
 handler h m = do
   hPutStr h ("Go to Hell!!!!!!\n")
   input <- (hGetLine h)
-  print input
   result <- atomically $ (handleInput input m)
   hPutStr h ((show result) ++ "\n")
 
