@@ -4,6 +4,7 @@ import Control.Concurrent
 import Control.Concurrent.STM
 import Control.Exception.Base
 import Control.Monad
+import Control.Monad.State
 import Network
 import System.IO
 import Text.Printf
@@ -85,6 +86,7 @@ handler :: Handle -> TVar (Map.Map String (Value a)) -> IO ()
 handler h m = do
   hPutStr h ("Go to Hell!!!!!!\n")
   input <- (hGetLine h)
+  print input
   result <- atomically $ (handleInput input m)
   hPutStr h ((show result) ++ "\n")
 

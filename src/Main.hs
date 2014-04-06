@@ -19,5 +19,3 @@ main = do
   printf "AClick initialized on port %d\n" port
   m <- atomically $ newTVar Map.empty
   forever (listen sock m)
-
-
