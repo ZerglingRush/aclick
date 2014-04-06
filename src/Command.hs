@@ -11,6 +11,9 @@ import Text.Printf
 import qualified Data.Map as Map
 import Data.Char (isDigit, toLower)
 
+invalidCommand :: Map.Map String (Value a) -> (Map.Map String (Value a), Value a)
+invalidCommand m = (m, Error 1 "Invalid command")
+
 invalidKey :: Value a
 invalidKey = Error 2 "No key found"
 
@@ -57,9 +60,6 @@ incrKey k m = (Map.insert k newVal m, newVal)
     addOne (IntValue v) = IntValue (v + 1)
     newVal = addOne $ Map.findWithDefault invalidKey k m
 
-invalidCommand :: Map.Map String (Value a) -> (Map.Map String (Value a), Value a)
-invalidCommand m = (m, Error 1 "Use it like this 'set key value' asshole")
-
 processCommands
   :: [String]
   -> Map.Map String (Value a)
@@ -84,7 +84,7 @@ handleInput input m = do
 
 handler :: Handle -> TVar (Map.Map String (Value a)) -> IO ()
 handler h m = do
-  hPutStr h ("Go to Hell!!!!!!\n")
+  hPutStr h ("Aclick ver 0")
   input <- (hGetLine h)
   print input
   result <- atomically $ (handleInput input m)
