@@ -10,6 +10,7 @@ import System.IO
 import Text.Printf
 import qualified Data.Map as Map
 import Data.Char (isDigit, toLower)
+import Data.List (isPrefixOf)
 
 data Command = Set | Get | Incr
 
@@ -19,13 +20,15 @@ type Database = Map.Map String Value
 
 instance Show Value where
   show (IntValue i)    = "(integer) " ++ show i
-  show (StringValue s) = show s
+  show (StringValue s) = "(string) "  ++ show s
   show (Nil)           = "(nil)"
 
 parseValue :: String -> Value
 parseValue s
-  | all isDigit s = IntValue $ read s
-  | otherwise     = StringValue s
+  -- Allows integers to be entered as strings by prefixing them with \s
+  | "\\s" `isPrefixOf` s = StringValue $ drop 2 s
+  | all isDigit s      = IntValue $ read s
+  | otherwise          = StringValue s
 
 parseCommand :: String -> Maybe Command
 parseCommand s
@@ -38,7 +41,8 @@ getKey :: String -> Database -> (Database, Value)
 getKey k m = (m, Map.findWithDefault Nil k m)
 
 setKey :: String -> String -> Database -> (Database, Value)
-setKey k v m = (Map.insert k (parseValue v) m, StringValue "success")
+setKey k v m = (Map.insert k value m, value)
+  where value = parseValue v
 
 incrKey :: String -> Database -> (Database, Value)
 incrKey k m = (Map.insert k newVal m, newVal)
