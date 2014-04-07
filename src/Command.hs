@@ -13,14 +13,14 @@ import Data.Char (isDigit, toLower)
 
 data Command = Set | Get | Incr
 
-data Value = IntValue Int | StringValue String | Error Int String
+data Value = IntValue Int | StringValue String | Nil
 
 type Database = Map.Map String Value
 
 instance Show Value where
-  show (IntValue i) = "(integer) " ++ show i
+  show (IntValue i)    = "(integer) " ++ show i
   show (StringValue s) = show s
-  show (Error i e) = show "(error #)" ++ show i ++ ":" ++ show e
+  show (Nil)           = "(nil)"
 
 parseValue :: String -> Value
 parseValue s
@@ -34,14 +34,8 @@ parseCommand s
   | map toLower s == "incr" = Just Incr
   | otherwise               = Nothing
 
-invalidCommand :: Database -> (Database, Value)
-invalidCommand m = (m, Error 1 "Invalid command")
-
-invalidKey :: Value
-invalidKey = Error 2 "No key found"
-
 getKey :: String -> Database -> (Database, Value)
-getKey k m = (m, Map.findWithDefault invalidKey k m)
+getKey k m = (m, Map.findWithDefault Nil k m)
 
 setKey :: String -> String -> Database -> (Database, Value)
 setKey k v m = (Map.insert k (parseValue v) m, StringValue "success")
@@ -50,18 +44,18 @@ incrKey :: String -> Database -> (Database, Value)
 incrKey k m = (Map.insert k newVal m, newVal)
   where
     addOne (IntValue v) = IntValue (v + 1)
-    newVal = addOne $ Map.findWithDefault invalidKey k m
+    newVal = addOne $ Map.findWithDefault Nil k m
 
 processCommands :: [String] -> Database -> (Database, Value)
-processCommands [] m = invalidCommand m
-processCommands [x] m = invalidCommand m
+processCommands [] m = (m, Nil)
+processCommands [x] m = (m, Nil)
 processCommands (x:y:[]) m = case (parseCommand x) of
   Just Get  -> getKey y m
   Just Incr -> incrKey y m
-  Nothing   -> invalidCommand m
+  Nothing   -> (m, Nil)
 processCommands (x:y:z:[]) m = case (parseCommand x) of
   Just Set -> setKey y z m
-  Nothing  -> invalidCommand m
+  Nothing  -> (m, Nil)
 
 handleInput :: String -> TVar Database -> STM Value
 handleInput input m = do
