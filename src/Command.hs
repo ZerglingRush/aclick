@@ -31,8 +31,8 @@ parseValue s
   | all isDigit s = IntValue $ read s
   | otherwise     = StringValue s
 
-fromString :: String -> Maybe Command
-fromString s
+parseCommand :: String -> Maybe Command
+parseCommand s
   | map toLower s == "set"  = Just Set
   | map toLower s == "get"  = Just Get
   | map toLower s == "incr" = Just Incr
@@ -66,11 +66,11 @@ processCommands
   -> (Map.Map String (Value a), Value a)
 processCommands [] m = invalidCommand m
 processCommands [x] m = invalidCommand m
-processCommands (x:y:[]) m = case (fromString x) of
+processCommands (x:y:[]) m = case (parseCommand x) of
   Just Get  -> getKey y m
   Just Incr -> incrKey y m
   Nothing   -> invalidCommand m
-processCommands (x:y:z:[]) m = case (fromString x) of
+processCommands (x:y:z:[]) m = case (parseCommand x) of
   Just Set -> setKey y z m
   Nothing  -> invalidCommand m
 
