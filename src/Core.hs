@@ -1,16 +1,8 @@
 module Core where
 
-import Control.Concurrent
-import Control.Concurrent.STM
-import Control.Exception.Base
-import Control.Monad
-import Control.Monad.State
-import Network
-import System.IO
-import Text.Printf
-import qualified Data.Map as Map
-import Data.Char (isDigit, toLower)
+import qualified Data.Map as Map (Map, findWithDefault, insert)
 import Data.List (isPrefixOf)
+import Data.Char (isDigit, toLower)
 
 data Command = Set | Get | Incr
 
@@ -52,7 +44,7 @@ incrKey k m = (newVal, Map.insert k newVal m)
 
 processCommands :: [String] -> Database -> (Value, Database)
 processCommands [] m = (Nil, m)
-processCommands [x] m = (Nil, m)
+processCommands [_] m = (Nil, m)
 processCommands (x:y:[]) m = case (parseCommand x) of
   Just Get  -> getKey y m
   Just Incr -> incrKey y m
