@@ -8,14 +8,8 @@ import Text.Printf
 import qualified Data.Map as Map
 import Data.Char (isDigit, toLower)
 
-import Command
-
-port :: Int
-port = 6666
+import Server
+import Core
 
 main :: IO ()
-main = do
-  sock <- listenOn (PortNumber (fromIntegral port))
-  printf "AClick initialized on port %d\n" port
-  m <- atomically $ newTVar Map.empty
-  forever (listen sock m)
+main = server
