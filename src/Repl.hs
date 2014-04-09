@@ -10,6 +10,7 @@ main = do
   forever $ do
     h <- connectTo "localhost" (PortNumber (fromIntegral 6666))
     hGetLine h
+    putStrLn "aclick> "
     getLine >>= hPutStrLn h
     hGetLine h >>= putStrLn
     hClose h
