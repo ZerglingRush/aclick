@@ -1,6 +1,6 @@
 module Core where
 
-import qualified Data.Map as Map (Map, findWithDefault, insert)
+import qualified Data.Map as Map (Map, findWithDefault, insert, empty)
 import Data.List (isPrefixOf)
 import Data.Char (isDigit, toLower)
 
@@ -9,6 +9,9 @@ data Command = Set | Get | Incr
 data Value = IntValue Int | StringValue String | Nil
 
 type Database = Map.Map String Value
+
+database :: Database
+database = Map.empty
 
 instance Show Value where
   show (IntValue i)    = "(integer) " ++ show i

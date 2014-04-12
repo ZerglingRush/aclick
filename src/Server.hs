@@ -1,13 +1,18 @@
 module Server where
 
 import Control.Concurrent.STM
-import Control.Concurrent
-import Control.Monad
-import Network
-import System.IO
-import Text.Printf
-import qualified Data.Map as Map
-import Data.Char (isDigit, toLower)
+ ( TVar
+  , STM
+  , newTVar
+  , readTVar
+  , writeTVar
+  , atomically
+  )
+import Control.Concurrent (forkFinally)
+import Control.Monad (forever)
+import Network (Socket, listenOn, PortID(..), accept)
+import System.IO (Handle, hPutStrLn, hGetLine, hPutStr, hClose)
+import Text.Printf (printf)
 
 import Core
 
@@ -37,7 +42,7 @@ port = 6666
 
 server :: IO ()
 server = do
-  m <- atomically $ newTVar Map.empty
+  m <- atomically $ newTVar database
   sock <- listenOn (PortNumber (fromIntegral port))
-  printf "AClick initialized on port %d\n" port
+  _ <- printf "AClick initialized on port %d\n" port
   forever (listen sock m)
